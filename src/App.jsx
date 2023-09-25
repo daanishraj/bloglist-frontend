@@ -4,8 +4,15 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 
+const getNewBlog = () => ({
+    title: '',
+    author: '',
+    url: ''
+  })
+
 const App = () => {
   const [blogs, setBlogs] = useState([])
+  const [newBlog, setNewBlog] = useState(getNewBlog())
   const [errorMessage, setErrorMessage] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('') 
@@ -35,6 +42,60 @@ const App = () => {
     </form>      
   )
 
+  const blogForm = () => (
+    <form onSubmit={addBlog}>
+      <div>
+        title:
+       <input
+          type="text"
+          value={newBlog.title}
+          name="Title"
+          onChange={({ target }) => setNewBlog({...newBlog, title: target.value})}
+        />
+      </div>
+      <div>
+        author:
+        <input
+          type="text"
+          value={newBlog.author}
+          name="Author"
+          onChange={({ target }) => setNewBlog({...newBlog, author: target.value})}
+        />
+      </div>
+      <div>
+        url:
+        <input
+          type="url"
+          value={newBlog.url}
+          name="Url"
+          onChange={({ target }) => setNewBlog({...newBlog, url: target.value})}
+        />
+      </div>
+      <button type="submit">create</button>
+    </form>  
+  )
+
+  const addBlog = async (event) => {
+    event.preventDefault()
+    const payload = {
+      title: newBlog.title,
+      author: newBlog.author,
+      url: newBlog.url
+    }
+
+    try {
+      const newBlog = await blogService.create(payload)
+      setBlogs(blogs.concat(newBlog))
+      setNewBlog(getNewBlog())
+    } catch(exception) {
+      console.log(exception)
+      setErrorMessage(exception.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
@@ -43,6 +104,7 @@ const App = () => {
       })
       window.localStorage.setItem('loggedInUser', JSON.stringify(user))
       setUser(user)
+      blogService.setToken(user.token)
       setUsername('')
       setPassword('')
     } catch (exception) {
@@ -56,9 +118,9 @@ const App = () => {
   }
 
   const handleLogout = () => {
-    console.log('logging out..')
     window.localStorage.removeItem('loggedInUser')
     setUser(null)
+    blogService.setToken(null)
   }
 
   useEffect(() => {
@@ -91,6 +153,10 @@ const App = () => {
        <Notification message={errorMessage} />
       <div>
       <p>{user.name} logged in</p> <button onClick={handleLogout} type="submit">logout</button>
+      </div>
+      <div>
+        <h2>Create new</h2>
+      {blogForm()}
       </div>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
