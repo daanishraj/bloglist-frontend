@@ -13,10 +13,18 @@ const getNewBlog = () => ({
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [newBlog, setNewBlog] = useState(getNewBlog())
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notification, setNotification]= useState({ message:null })
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('') 
   const [user, setUser] = useState(null)
+
+  const notify = (message, isError=false) => {
+    setNotification({ message, isError })
+    setTimeout(() => {
+      setNotification({ message:null })
+    }, 4000)
+  }
+
 
   const loginForm = () => (
     <form onSubmit={handleLogin}>
@@ -87,12 +95,10 @@ const App = () => {
       const newBlog = await blogService.create(payload)
       setBlogs(blogs.concat(newBlog))
       setNewBlog(getNewBlog())
-    } catch(exception) {
-      console.log(exception)
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      notify(`A new blog ${newBlog.title} by ${user.name} added`)
+    } catch(error) {
+      console.log(error)
+      notify(error.response.data.error, true)
     }
   }
 
@@ -107,13 +113,9 @@ const App = () => {
       blogService.setToken(user.token)
       setUsername('')
       setPassword('')
-    } catch (exception) {
-      console.log('error logging in..')
-      console.log(exception)
-      setErrorMessage(exception.response.data.error)
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+    } catch (error) {
+      console.log(error)
+      notify(error.response.data.error, true)
     }
   }
 
@@ -140,7 +142,7 @@ const App = () => {
   if (user===null) {
     return (
       <div>
-         <Notification message={errorMessage} />
+          <Notification message={notification.message} isError={notification.isError}/>
         <h2>Log in to application</h2>
         {loginForm()}
       </div>
@@ -150,7 +152,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-       <Notification message={errorMessage} />
+      <Notification message={notification.message} isError={notification.isError}/>
       <div>
       <p>{user.name} logged in</p> <button onClick={handleLogout} type="submit">logout</button>
       </div>
