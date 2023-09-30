@@ -8,6 +8,7 @@ const getNewBlog = () => ({
 
 const BlogForm = ({createBlog}) => {
   const [newBlog, setNewBlog] = useState(getNewBlog())
+  const [isFormVisible, setIsFormVisible] = useState(false)
 
     const addBlog = async (event) => {
         event.preventDefault()
@@ -19,12 +20,14 @@ const BlogForm = ({createBlog}) => {
         
         createBlog(payload)
         setNewBlog(getNewBlog())
+        setIsFormVisible(false)
       }
-    
 
-    return (
-      <>
-      <h2>Create new</h2>
+    const onToggleBlogForm = () => setIsFormVisible(!isFormVisible)
+
+      const getForm = () => (
+        <>
+        <h2>Create new</h2>
         <form onSubmit={addBlog}>
           <div>
             title:
@@ -54,8 +57,17 @@ const BlogForm = ({createBlog}) => {
             />
           </div>
           <button type="submit">create</button>
+          <button type="submit" onClick={onToggleBlogForm}>cancel</button>
         </form> 
-        </> 
+        </>
+      )
+    
+
+    return (
+      <>
+      {!isFormVisible && <button onClick={onToggleBlogForm}>new blog</button>}
+      {isFormVisible && getForm()}
+      </>
       )
 
 }
