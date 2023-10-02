@@ -18,7 +18,6 @@ const BlogForm = ({createBlog}) => {
         }
         
         await createBlog(payload)
-        console.log('we are here..')
         setNewBlog(getNewBlog())
       }
     

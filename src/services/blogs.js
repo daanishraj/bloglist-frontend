@@ -21,4 +21,9 @@ const create = (payload) => {
   return request.then(response => response.data)
 }
 
-export default { getAll, create, setToken }
+const updateLikes = (payload, blogId) => {
+  const request = axios.put(`${baseUrl}/${blogId}`, payload)
+  return request.then(response => response.data)
+}
+
+export default { getAll, create, updateLikes, setToken }
