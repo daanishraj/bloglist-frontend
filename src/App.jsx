@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import Blog from './components/Blog'
 import BlogForm from './components/BlogForm'
 import LoginForm from './components/LoginForm'
@@ -14,6 +14,9 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('') 
   const blogFormRef = useRef(null)
+  const sortedBlogs = useMemo(()=> blogs.toSorted((a,b)=>b.likes - a.likes), [blogs])
+
+  console.log({ blogs })
 
   const notify = (message, isError=false) => {
     setNotification({ message, isError })
@@ -21,6 +24,7 @@ const App = () => {
       setNotification({ message:null })
     }, 4000)
   }
+
 
   const createBlog = async (aBlog)=> {
     try {
@@ -109,7 +113,7 @@ const App = () => {
       <BlogForm createBlog={createBlog}/>
       </Togglable>
       </div>
-      {blogs.map(blog =>
+      {sortedBlogs.map(blog =>
         <Blog key={blog.id} blog={blog} updateLikes={updateBlogLikes} />
       )}
     </div>
