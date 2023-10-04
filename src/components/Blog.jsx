@@ -43,10 +43,10 @@ const Blog = ({ blog: { url, title, author, likes, id, user }, updateLikes, user
   )
 
   return (
-  <div style={blogStyle}>
-    <p>{title} <button onClick={()=> setIsInfoVisible(!isInfoVisible)}>{isInfoVisible ? 'hide' : 'view' }</button></p>
-    {isInfoVisible && getBlogDetails()}
-  </div>  
+    <div style={blogStyle}>
+      <p>{title} <button onClick={() => setIsInfoVisible(!isInfoVisible)}>{isInfoVisible ? 'hide' : 'view' }</button></p>
+      {isInfoVisible && getBlogDetails()}
+    </div>
   )
 }
 

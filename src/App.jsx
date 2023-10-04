@@ -12,9 +12,9 @@ const App = () => {
   const [notification, setNotification]= useState({ message:null })
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('') 
+  const [password, setPassword] = useState('')
   const blogFormRef = useRef(null)
-  const sortedBlogs = useMemo(()=> blogs.toSorted((a,b)=>b.likes - a.likes), [blogs])
+  const sortedBlogs = useMemo(() => blogs.toSorted((a,b) => b.likes - a.likes), [blogs])
 
   console.log({ sortedBlogs })
 
@@ -30,7 +30,7 @@ const App = () => {
     setBlogs(blogs)
   }
 
-  const createBlog = async (aBlog)=> {
+  const createBlog = async (aBlog) => {
     try {
       blogFormRef.current.toggleVisibility()
       const createdBlog = await blogService.create(aBlog)
@@ -55,8 +55,8 @@ const App = () => {
   const removeBlog = async (blogId) => {
     try {
       await blogService.remove(blogId)
-      setBlogs(prevState => prevState.filter(blog=>blog.id!==blogId))
-      notify(`The blog has been removed`)
+      setBlogs(prevState => prevState.filter(blog => blog.id!==blogId))
+      notify('The blog has been removed')
     } catch (error) {
       console.log(error)
       notify(error.response.data.error, true)
@@ -66,20 +66,20 @@ const App = () => {
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-        const user = await loginService.login({
+      const user = await loginService.login({
         username, password,
-        })
-        console.log({user})
-        window.localStorage.setItem('loggedInUser', JSON.stringify(user))
-        setUser(user)
-        blogService.setToken(user.token)
-        setUsername('')
-        setPassword('')
+      })
+      console.log({ user })
+      window.localStorage.setItem('loggedInUser', JSON.stringify(user))
+      setUser(user)
+      blogService.setToken(user.token)
+      setUsername('')
+      setPassword('')
     } catch (error) {
-        console.log(error)
-        notify(error.response.data.error, true)
+      console.log(error)
+      notify(error.response.data.error, true)
     }
-    }
+  }
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedInUser')
@@ -90,7 +90,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   useEffect(() => {
@@ -105,14 +105,14 @@ const App = () => {
   if (user===null) {
     return (
       <div>
-          <Notification message={notification.message} isError={notification.isError}/>
-         <LoginForm
-              username={username}
-              password={password}
-              setUsername={setUsername}
-              setPassword={setPassword}
-              handleLogin={handleLogin}
-          />
+        <Notification message={notification.message} isError={notification.isError}/>
+        <LoginForm
+          username={username}
+          password={password}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          handleLogin={handleLogin}
+        />
       </div>
     )
   }
@@ -122,12 +122,12 @@ const App = () => {
       <h2>blogs</h2>
       <Notification message={notification.message} isError={notification.isError}/>
       <div>
-      <p>{user.name} logged in</p> <button onClick={handleLogout} type="submit">logout</button>
+        <p>{user.name} logged in</p> <button onClick={handleLogout} type="submit">logout</button>
       </div>
-    <div>
-      <Togglable buttonLabel='new blog' ref={blogFormRef}>
-      <BlogForm createBlog={createBlog}/>
-      </Togglable>
+      <div>
+        <Togglable buttonLabel='new blog' ref={blogFormRef}>
+          <BlogForm createBlog={createBlog}/>
+        </Togglable>
       </div>
       {sortedBlogs.map(blog =>
         <Blog key={blog.id} blog={blog} updateLikes={updateBlogLikes} userDetails={user} removeBlog={removeBlog} />
