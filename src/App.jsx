@@ -16,7 +16,7 @@ const App = () => {
   const blogFormRef = useRef(null)
   const sortedBlogs = useMemo(()=> blogs.toSorted((a,b)=>b.likes - a.likes), [blogs])
 
-  console.log({ blogs })
+  console.log({ sortedBlogs })
 
   const notify = (message, isError=false) => {
     setNotification({ message, isError })
@@ -25,12 +25,16 @@ const App = () => {
     }, 4000)
   }
 
+  const refetchAndUpdate = async () => {
+    const blogs = await blogService.getAll()
+    setBlogs(blogs)
+  }
 
   const createBlog = async (aBlog)=> {
     try {
       blogFormRef.current.toggleVisibility()
       const createdBlog = await blogService.create(aBlog)
-      setBlogs(blogs.concat(createdBlog))
+      refetchAndUpdate()
       notify(`A new blog ${createdBlog.title} by ${user.name} added`)
     } catch(error) {
       console.log(error)
@@ -40,8 +44,19 @@ const App = () => {
 
   const updateBlogLikes = async (payload, blogId) => {
     try {
-      const updatedBlog = await blogService.updateLikes(payload, blogId)
-      setBlogs(blogs.map(blog=>blog.id!==updatedBlog.id ? blog : updatedBlog))
+      await blogService.updateLikes(payload, blogId)
+      refetchAndUpdate()
+    } catch (error) {
+      console.log(error)
+      notify(error.response.data.error, true)
+    }
+  }
+
+  const removeBlog = async (blogId) => {
+    try {
+      await blogService.remove(blogId)
+      setBlogs(prevState => prevState.filter(blog=>blog.id!==blogId))
+      notify(`The blog has been removed`)
     } catch (error) {
       console.log(error)
       notify(error.response.data.error, true)
@@ -82,6 +97,7 @@ const App = () => {
     const loggedInUserJSON = window.localStorage.getItem('loggedInUser')
     if (loggedInUserJSON) {
       const user = JSON.parse(loggedInUserJSON)
+      blogService.setToken(user.token)
       setUser(user)
     }
   }, [])
@@ -114,7 +130,7 @@ const App = () => {
       </Togglable>
       </div>
       {sortedBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateLikes={updateBlogLikes} />
+        <Blog key={blog.id} blog={blog} updateLikes={updateBlogLikes} userDetails={user} removeBlog={removeBlog} />
       )}
     </div>
   )
