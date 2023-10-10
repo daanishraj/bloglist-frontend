@@ -80,5 +80,32 @@ describe('Bloglist', function(){
 
       cy.get('html').should('not.contain', title)
     })
+
+    it('does not show delete button for the blog when the user is different from creator', function(){
+      const secondUser = {
+        username: 'swami',
+        name: 'yukteswar',
+        password: 'Serampore'
+      }
+      cy.request('POST', `${Cypress.env('BACKEND')}/users`, secondUser)
+
+      //first user creates a blog
+      const title = 'Third blog...'
+      const author = 'Virat Kohli'
+      const url = 'https://www.yoga.de'
+      cy.create({ title, author, url })
+
+      cy.get('[data-testid="blog-title"]').should('contain', title)
+      cy.contains('view').click()
+      cy.get('[data-testid="blog-details"]').should('contain', 'remove')
+
+      cy.get('button:contains("logout")').click()
+
+      //second user logs in
+      cy.login({ username: secondUser.username, password: secondUser.password })
+      cy.get('[data-testid="blog-title"]').should('contain', title)
+      cy.contains('view').click()
+      cy.get('[data-testid="blog-details"]').should('not.contain', 'remove')
+    })
   })
 })
