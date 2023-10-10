@@ -65,5 +65,20 @@ describe('Bloglist', function(){
       cy.get('[data-testid="blog-details"] button:contains("like")').click()
       cy.get('[data-testid="blog-details"]').should('contain', 'likes 1')
     })
+
+    it('A blog created by that user can be deleted by them', function(){
+      const title = 'Third blog...'
+      const author = 'Virat Kohli'
+      const url = 'https://www.yoga.de'
+      cy.create({ title, author, url })
+
+      cy.contains('view').click()
+
+      cy.get('[data-testid="blog-title"]').should('contain', title)
+
+      cy.get('[data-testid="blog-details"] button:contains("remove")').click()
+
+      cy.get('html').should('not.contain', title)
+    })
   })
 })
