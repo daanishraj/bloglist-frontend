@@ -32,7 +32,7 @@ const Blog = ({ blog: { url, title, author, likes, id, user }, updateLikes, user
   }
 
   const getBlogDetails = () => (
-    <div>
+    <div data-testid="blog-details">
       <p>{url}</p>
       <p>likes {likes}
         <button onClick={onLike}>like</button>
@@ -44,7 +44,7 @@ const Blog = ({ blog: { url, title, author, likes, id, user }, updateLikes, user
 
   return (
     <div style={blogStyle}>
-      <p>{title} <button onClick={() => setIsInfoVisible(!isInfoVisible)}>{isInfoVisible ? 'hide' : 'view' }</button></p>
+      <p data-testid="blog-title">{title} <button onClick={() => setIsInfoVisible(!isInfoVisible)}>{isInfoVisible ? 'hide' : 'view' }</button></p>
       {isInfoVisible && getBlogDetails()}
     </div>
   )

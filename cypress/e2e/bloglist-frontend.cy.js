@@ -1,13 +1,17 @@
+const username = 'paramhansa'
+const password = 'Divine'
+const name = 'yogananda'
+
 describe('Bloglist', function(){
   beforeEach(function(){
-    cy.request('POST', 'http://localhost:3003/api/testing/reset')
+    cy.request('POST', `${Cypress.env('BACKEND')}/testing/reset`)
     const user = {
-      username: 'paramhansa',
-      name: 'yogananda',
-      password: 'Divine'
+      username,
+      name,
+      password
     }
-    cy.request('POST', 'http://localhost:3003/api/users', user)
-    cy.visit('http://localhost:5173')
+    cy.request('POST', `${Cypress.env('BACKEND')}/users`, user)
+    cy.visit('')
   })
 
   it('Login form is shown', () => {
@@ -32,6 +36,34 @@ describe('Bloglist', function(){
       cy.get('.failure').should('contain','invalid password')
       cy.contains('yogananda logged in').should('not.exist')
 
+    })
+  })
+
+  describe('when logged in', function(){
+    beforeEach(function(){
+      cy.login({ username, password })
+      // should we delete all the blogs in the database before starting?
+    })
+
+    it('A blog can be created', function(){
+      const title = 'First blog...'
+      const author = 'Michael Schumacher'
+      const url = 'https://www.yoga.org'
+      cy.create({ title, author, url })
+
+      cy.get('[data-testid="blog-title"]').should('contain', title)
+    })
+
+    it('A blog can be liked', function(){
+      const title = 'Second blog...'
+      const author = 'Jesus'
+      const url = 'https://www.yoga.de'
+      cy.create({ title, author, url })
+
+      cy.contains('view').click()
+      cy.get('[data-testid="blog-details"]').should('contain', 'likes 0')
+      cy.get('[data-testid="blog-details"] button:contains("like")').click()
+      cy.get('[data-testid="blog-details"]').should('contain', 'likes 1')
     })
   })
 })

@@ -14,7 +14,7 @@ const Togglable = forwardRef(({ buttonLabel,children }, refs) => {
 
   return (
     <>
-      { !isVisible && <button  onClick={toggleVisibility}>{buttonLabel}</button>}
+      { !isVisible && <button data-testid="show-blog-form"  onClick={toggleVisibility}>{buttonLabel}</button>}
       { isVisible &&
     <>
       {children}
