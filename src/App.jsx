@@ -34,7 +34,7 @@ const App = () => {
     try {
       blogFormRef.current.toggleVisibility()
       const createdBlog = await blogService.create(aBlog)
-      refetchAndUpdate()
+      await refetchAndUpdate()
       notify(`A new blog ${createdBlog.title} by ${user.name} added`)
     } catch(error) {
       console.log(error)
@@ -45,7 +45,7 @@ const App = () => {
   const updateBlogLikes = async (payload, blogId) => {
     try {
       await blogService.updateLikes(payload, blogId)
-      refetchAndUpdate()
+      await refetchAndUpdate()
     } catch (error) {
       console.log(error)
       notify(error.response.data.error, true)

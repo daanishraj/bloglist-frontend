@@ -90,7 +90,7 @@ describe('Bloglist', function(){
       cy.request('POST', `${Cypress.env('BACKEND')}/users`, secondUser)
 
       //first user creates a blog
-      const title = 'Third blog...'
+      const title = 'One more blog...'
       const author = 'Virat Kohli'
       const url = 'https://www.yoga.de'
       cy.create({ title, author, url })
@@ -106,6 +106,25 @@ describe('Bloglist', function(){
       cy.get('[data-testid="blog-title"]').should('contain', title)
       cy.contains('view').click()
       cy.get('[data-testid="blog-details"]').should('not.contain', 'remove')
+    })
+
+    it('orders the blogs in descending order of likes', function(){
+      cy.create({ title: 'first blog', author: 'Rohit', url: 'https://www.peace.de' })
+      cy.contains('view').click()
+
+      cy.create({ title: 'second blog', author: 'Shubman', url: 'https://www.peace.de' })
+      cy.contains('view').click()
+
+
+      cy.get('[data-testid="blog-title"]').eq(0).should('contain','first blog')
+      cy.get('[data-testid="blog-title"]').eq(1).should('contain','second blog')
+
+      cy.get('[data-testid="like-button"]').eq(1).click()
+
+      cy.wait(1000)
+
+      cy.get('[data-testid="blog-title"]').eq(0).should('contain','second blog')
+      cy.get('[data-testid="blog-title"]').eq(1).should('contain','first blog')
     })
   })
 })
