@@ -6,8 +6,10 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
+import useGetBlogs from './hooks/UseGetBlogs'
 
 const App = () => {
+  const [data, isLoading, isError, error ] = useGetBlogs()
   const [blogs, setBlogs] = useState([])
   const [notification, setNotification]= useState({ message:null })
   const [user, setUser] = useState(null)
@@ -88,10 +90,10 @@ const App = () => {
   }
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
-  }, [])
+    if (data){
+      setBlogs(data)
+    }
+  }, [data])
 
   useEffect(() => {
     const loggedInUserJSON = window.localStorage.getItem('loggedInUser')
@@ -115,6 +117,14 @@ const App = () => {
         />
       </div>
     )
+  }
+
+  if (isLoading) {
+    return <div>loading..</div>
+  }
+
+  if (isError) {
+    return <div>`there was an error: ${error.message}`</div>
   }
 
   return (
