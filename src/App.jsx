@@ -7,41 +7,40 @@ import loginService from './services/login'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import useGetBlogs from './hooks/UseGetBlogs'
+import useCreateBlog from './hooks/UseCreateBlog'
+import { useQueryClient } from '@tanstack/react-query'
 
 const App = () => {
-  const [data, isLoading, isError, error ] = useGetBlogs()
   const [blogs, setBlogs] = useState([])
-  const [notification, setNotification]= useState({ message:null })
+  const [notification, setNotification] = useState({ message: null })
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const blogFormRef = useRef(null)
-  const sortedBlogs = useMemo(() => blogs.toSorted((a,b) => b.likes - a.likes), [blogs])
-
-  console.log({ sortedBlogs })
-
-  const notify = (message, isError=false) => {
+  const sortedBlogs = useMemo(
+    () => blogs.toSorted((a, b) => b.likes - a.likes),
+    [blogs]
+  )
+  const notify = (message, isError = false) => {
     setNotification({ message, isError })
     setTimeout(() => {
-      setNotification({ message:null })
+      setNotification({ message: null })
     }, 4000)
   }
+  const [data, isLoading, isError, error] = useGetBlogs()
+  const [{ createBlog }] = useCreateBlog(notify, user)
+
+  console.log({ sortedBlogs })
 
   const refetchAndUpdate = async () => {
     const blogs = await blogService.getAll()
     setBlogs(blogs)
   }
 
-  const createBlog = async (aBlog) => {
-    try {
-      blogFormRef.current.toggleVisibility()
-      const createdBlog = await blogService.create(aBlog)
-      await refetchAndUpdate()
-      notify(`A new blog ${createdBlog.title} by ${user.name} added`)
-    } catch(error) {
-      console.log(error)
-      notify(error.response.data.error, true)
-    }
+  const createNewBlog = async (aBlog) => {
+    blogFormRef.current.toggleVisibility()
+    const newBlog = await createBlog(aBlog)
+    setBlogs(blogs.concat(newBlog))
   }
 
   const updateBlogLikes = async (payload, blogId) => {
@@ -57,7 +56,7 @@ const App = () => {
   const removeBlog = async (blogId) => {
     try {
       await blogService.remove(blogId)
-      setBlogs(prevState => prevState.filter(blog => blog.id!==blogId))
+      setBlogs((prevState) => prevState.filter((blog) => blog.id !== blogId))
       notify('The blog has been removed')
     } catch (error) {
       console.log(error)
@@ -69,7 +68,8 @@ const App = () => {
     event.preventDefault()
     try {
       const user = await loginService.login({
-        username, password,
+        username,
+        password,
       })
       console.log({ user })
       window.localStorage.setItem('loggedInUser', JSON.stringify(user))
@@ -90,7 +90,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (data){
+    if (data) {
       setBlogs(data)
     }
   }, [data])
@@ -104,10 +104,13 @@ const App = () => {
     }
   }, [])
 
-  if (user===null) {
+  if (user === null) {
     return (
       <div>
-        <Notification message={notification.message} isError={notification.isError}/>
+        <Notification
+          message={notification.message}
+          isError={notification.isError}
+        />
         <LoginForm
           username={username}
           password={password}
@@ -130,18 +133,30 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={notification.message} isError={notification.isError}/>
+      <Notification
+        message={notification.message}
+        isError={notification.isError}
+      />
       <div>
-        <p>{user.name} logged in</p> <button onClick={handleLogout} type="submit">logout</button>
+        <p>{user.name} logged in</p>{' '}
+        <button onClick={handleLogout} type="submit">
+          logout
+        </button>
       </div>
       <div>
-        <Togglable buttonLabel='new blog' ref={blogFormRef}>
-          <BlogForm createBlog={createBlog}/>
+        <Togglable buttonLabel="new blog" ref={blogFormRef}>
+          <BlogForm createBlog={createNewBlog} />
         </Togglable>
       </div>
-      {sortedBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateLikes={updateBlogLikes} userDetails={user} removeBlog={removeBlog} />
-      )}
+      {sortedBlogs.map((blog) => (
+        <Blog
+          key={blog.id}
+          blog={blog}
+          updateLikes={updateBlogLikes}
+          userDetails={user}
+          removeBlog={removeBlog}
+        />
+      ))}
     </div>
   )
 }
