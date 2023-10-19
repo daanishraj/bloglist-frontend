@@ -11,7 +11,7 @@ const useCreateBlog = (notify, user) => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] })
     },
     onError: async (error) => {
-      notify(error.message, true)
+      notify(error.data.error, true)
     }
   })
 

@@ -8,7 +8,7 @@ import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import useGetBlogs from './hooks/UseGetBlogs'
 import useCreateBlog from './hooks/UseCreateBlog'
-import { useQueryClient } from '@tanstack/react-query'
+import useUpdateBlogLikes from './hooks/UseUpdateBlogLikes'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -29,13 +29,9 @@ const App = () => {
   }
   const [data, isLoading, isError, error] = useGetBlogs()
   const [{ createBlog }] = useCreateBlog(notify, user)
+  const [{ likeBlog }] = useUpdateBlogLikes(notify)
 
   console.log({ sortedBlogs })
-
-  const refetchAndUpdate = async () => {
-    const blogs = await blogService.getAll()
-    setBlogs(blogs)
-  }
 
   const createNewBlog = async (aBlog) => {
     blogFormRef.current.toggleVisibility()
@@ -43,15 +39,8 @@ const App = () => {
     setBlogs(blogs.concat(newBlog))
   }
 
-  const updateBlogLikes = async (payload, blogId) => {
-    try {
-      await blogService.updateLikes(payload, blogId)
-      await refetchAndUpdate()
-    } catch (error) {
-      console.log(error)
-      notify(error.response.data.error, true)
-    }
-  }
+  const updateBlogLikes = (payload, blogId) => likeBlog({ payload, blogId })
+
 
   const removeBlog = async (blogId) => {
     try {
@@ -71,7 +60,6 @@ const App = () => {
         username,
         password,
       })
-      console.log({ user })
       window.localStorage.setItem('loggedInUser', JSON.stringify(user))
       setUser(user)
       blogService.setToken(user.token)
