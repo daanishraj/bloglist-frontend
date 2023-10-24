@@ -9,10 +9,11 @@ import Togglable from './components/Togglable'
 import useGetBlogs from './hooks/UseGetBlogs'
 import useCreateBlog from './hooks/UseCreateBlog'
 import useUpdateBlogLikes from './hooks/UseUpdateBlogLikes'
+import { useDispatchNotification } from './contexts/NotificationContext'
 
 const App = () => {
+  const notify = useDispatchNotification()
   const [blogs, setBlogs] = useState([])
-  const [notification, setNotification] = useState({ message: null })
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -21,12 +22,6 @@ const App = () => {
     () => blogs.toSorted((a, b) => b.likes - a.likes),
     [blogs]
   )
-  const notify = (message, isError = false) => {
-    setNotification({ message, isError })
-    setTimeout(() => {
-      setNotification({ message: null })
-    }, 4000)
-  }
   const [data, isLoading, isError, error] = useGetBlogs()
   const [{ createBlog }] = useCreateBlog(notify, user)
   const [{ likeBlog }] = useUpdateBlogLikes(notify)
@@ -95,10 +90,7 @@ const App = () => {
   if (user === null) {
     return (
       <div>
-        <Notification
-          message={notification.message}
-          isError={notification.isError}
-        />
+        <Notification/>
         <LoginForm
           username={username}
           password={password}
@@ -121,10 +113,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
-      <Notification
-        message={notification.message}
-        isError={notification.isError}
-      />
+      <Notification/>
       <div>
         <p>{user.name} logged in</p>{' '}
         <button onClick={handleLogout} type="submit">
