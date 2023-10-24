@@ -1,21 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import blogService from '../services/blogs'
 
-const useUpdateBlogLikes = (notify) => {
+const useDeleteBlog = (notify) => {
   const queryClient = useQueryClient()
   const { mutate } = useMutation({
-    mutationFn: blogService.updateLikes,
-    onSuccess: (updatedBlog, { blogId }) => {
+    mutationFn: blogService.remove,
+    onSuccess: (_,  blogId ) => {
       queryClient.setQueryData(['blogs'], (blogs) => {
-        return blogs.map(blog => blog.id === blogId ? updatedBlog : blog)
+        return blogs.filter(blog => blog.id !== blogId)
       })
+      notify('The blog has been removed')
     },
     onError: async (error) => {
       notify(error.response.data.error, true)
     }
   })
 
-  return [{ likeBlog: mutate } ]
+  return [{ deleteBlog: mutate } ]
 }
 
-export default useUpdateBlogLikes
+export default useDeleteBlog

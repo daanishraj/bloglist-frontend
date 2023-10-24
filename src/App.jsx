@@ -10,6 +10,7 @@ import useGetBlogs from './hooks/UseGetBlogs'
 import useCreateBlog from './hooks/UseCreateBlog'
 import useUpdateBlogLikes from './hooks/UseUpdateBlogLikes'
 import { useDispatchNotification } from './contexts/NotificationContext'
+import useDeleteBlog from './hooks/useDeleteBlog'
 
 const App = () => {
   const notify = useDispatchNotification()
@@ -25,6 +26,7 @@ const App = () => {
   const [data, isLoading, isError, error] = useGetBlogs()
   const [{ createBlog }] = useCreateBlog(notify, user)
   const [{ likeBlog }] = useUpdateBlogLikes(notify)
+  const [{ deleteBlog }] = useDeleteBlog(notify)
 
   console.log({ sortedBlogs })
 
@@ -36,17 +38,7 @@ const App = () => {
 
   const updateBlogLikes = (payload, blogId) => likeBlog({ payload, blogId })
 
-
-  const removeBlog = async (blogId) => {
-    try {
-      await blogService.remove(blogId)
-      setBlogs((prevState) => prevState.filter((blog) => blog.id !== blogId))
-      notify('The blog has been removed')
-    } catch (error) {
-      console.log(error)
-      notify(error.response.data.error, true)
-    }
-  }
+  const removeBlog = (blogId) => deleteBlog(blogId)
 
   const handleLogin = async (event) => {
     event.preventDefault()
